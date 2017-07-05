@@ -1,0 +1,16 @@
+
+begin
+
+	let a call b if {
+		a knows (init(b) \notin secret(a));
+	}
+	
+	topology {
+		a neighbour b;
+		b neighbour c;
+		c neighbour a;
+		//d neighbour a;
+		//e neighbour a;
+	}
+
+end

@@ -1,0 +1,10 @@
+
+begin
+
+	let a call b if {
+		disjunct c: {a knows ( 
+			(init(c) \in (secret(a) \cup secret(b))) && (init(c) \notin (secret(a) \cap secret(b)))
+		 )};
+	}
+
+end

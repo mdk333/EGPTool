@@ -1,0 +1,126 @@
+/* This parser specification for the parser to parse the expanded condition_expr, that is
+   the condition expression without disjunction and conjuction constructs, as well as 
+    without all the preambles. */
+
+import java.util.ArrayList;
+import java.util.HashSet;
+
+action code {: 
+
+:};
+
+/* Variables */
+terminal String AGENT_IDENTIFIER;
+
+/* Types */
+terminal Integer INTEGER;
+terminal TRUE, FALSE;
+
+/* Key words */
+terminal AGENT, KNOWS, SECRET, INIT, FIN, EMPTYSET;
+
+/* Program punctuations */
+terminal BEGIN, END, SEMI, LPAREN, RPAREN, COLON, COMMA, LBRACE, RBRACE, PIPE;
+
+/* Operators */
+terminal MULTIPLY, PLUS, MINUS, MODULUS;
+terminal DOUBLEEQUAL, LESSTHAN, LESSTHANEQUAL, GREATERTHAN, GREATERTHANEQUAL, NOTEQUAL;
+
+/* Set boolean operators */
+terminal SUBSET, PROPERSUBSET, UNION, INTERSECTION, COMPLEMENT;
+
+/* Boolean operators */
+terminal AND, OR, IMPLIES, NOT, SETELEMENT, NOTSETELEMENT;
+
+/* Non-terminals */
+non terminal HashSet<SituationBHive> condition_expr; 
+non terminal String set_boolean_expr;
+non terminal String set_expr, int_expr, set_magnitude; 
+non terminal String boolean_expr;
+non terminal String set_proper, singleton, empty_set;
+//non terminal String condition_expr_exp;
+
+/* Precedences */
+
+precedence nonassoc LPAREN, RPAREN;
+precedence right NOT;
+
+precedence left AND, OR;
+precedence left IMPLIES;
+
+precedence left MULTIPLY, MODULUS;
+precedence left PLUS, MINUS;
+
+precedence left DOUBLEEQUAL, LESSTHAN, LESSTHANEQUAL, GREATERTHAN, GREATERTHANEQUAL, NOTEQUAL;
+precedence right COMPLEMENT;
+
+precedence left SUBSET, PROPERSUBSET, UNION, INTERSECTION;
+
+/* The grammar */
+
+condition_expr ::= AGENT_IDENTIFIER:ai KNOWS set_boolean_expr:sbe {: RESULT = utilities.getKnowsSetBooleanExpr(Integer.parseInt(ai), sbe); :} | 
+                   AGENT_IDENTIFIER:ai NOT KNOWS set_boolean_expr:sbe {: RESULT = utilities.getNotKnowsSetBooleanExpr(Integer.parseInt(ai), sbe); :} |  
+                   AGENT_IDENTIFIER:ai  KNOWS {: utilities.updateTT(ai); :}  condition_expr:ce {: RESULT = utilities.getKnowsCondExpr(Integer.parseInt(ai), ce); :} |  
+                   AGENT_IDENTIFIER:ai NOT KNOWS {: utilities.updateTT(ai); :} condition_expr:ce {: RESULT = utilities.getNotKnowsCondExpr(Integer.parseInt(ai), ce); :} |  
+                   condition_expr:ce1 OR condition_expr:ce2 {: RESULT = utilities.getCondExprOROperator(ce1, ce2); :} | 
+                   condition_expr:ce1 AND condition_expr:ce2 {: RESULT = utilities.getCondExprANDOperator(ce1, ce2); :} |
+                   condition_expr:ce1 IMPLIES condition_expr:ce2 {: RESULT = utilities.getCondExprImplication(ce1, ce2); :} |
+                   NOT condition_expr:ce {: RESULT = utilities.getCondExprNOT(ce); :} |
+                   LPAREN condition_expr:ce RPAREN {: RESULT = ce; :};
+
+/*
+condition_expr_exp ::= AGENT_IDENTIFIER:ai KNOWS condition_expr_exp:cee {: RESULT =  Utilities.getKnowsPhi(ai, cee); :} |   
+                   AGENT_IDENTIFIER:ai NOT KNOWS condition_expr_exp:cee {: RESULT = Utilities.getNotKnowsPhi(ai, cee); :} |
+                   NOT condition_expr_exp:cee {: RESULT = Utilities.getNOT(cee); :} |
+                   set_boolean_expr:sbe {: RESULT = sbe; :} |
+                   LPAREN condition_expr_exp:cee RPAREN {: RESULT = cee ; :} ;
+*/
+
+set_boolean_expr ::= set_boolean_expr:sbe1 AND set_boolean_expr:sbe2 {: RESULT = "(" + sbe1 + "&&" + sbe2 + ")"; :} |
+                 set_boolean_expr:sbe1 OR set_boolean_expr:sbe2 {: RESULT = "(" + sbe1 + "||" + sbe2 + ")"; :} |
+                 set_boolean_expr:sbe1 IMPLIES set_boolean_expr:sbe2 {: RESULT = "(" + sbe1 + "->" + sbe2 + ")"; :} |
+                 NOT set_boolean_expr:sbe {: RESULT = "\\neg (" + sbe + ")" ; :} |
+                 singleton:sing SETELEMENT set_expr:se {: RESULT = "(" + sing + "\\in" + se + ")"; :} |
+                 singleton:sing NOTSETELEMENT set_expr:se {: RESULT = "(" + sing + "\\notin" + se + ")"; :} |
+                 set_expr:se1 SUBSET set_expr:se2 {: RESULT = "(" + se1 + "\\subset" + se2 + ")"; :} |
+                 set_expr:se1 PROPERSUBSET set_expr:se2 {: RESULT = "(" + se1 + "\\subseteq" + se2 + ")"; :} |
+                 set_expr:se1 DOUBLEEQUAL set_expr:se2 {: RESULT = "(" + se1 + "==" + se2 + ")"; :} |
+                 set_expr:se1 NOTEQUAL set_expr:se2 {: RESULT = "(" + se1 + "!=" + se2 + ")"; :} |
+                 int_expr:ie1 GREATERTHAN int_expr:ie2 {: RESULT = "(" + ie1 + ">" + ie2 + ")"; :} |
+                 int_expr:ie1 GREATERTHANEQUAL int_expr:ie2 {: RESULT = "(" + ie1 + ">=" + ie2 + ")"; :} |
+                 int_expr:ie1 LESSTHAN int_expr:ie2 {: RESULT = "(" + ie1 + "<" + ie2 + ")"; :} |
+                 int_expr:ie1 LESSTHANEQUAL int_expr:ie2 {: RESULT = "(" + ie1 + "<=" + ie2 + ")"; :} |
+                 int_expr:ie1 DOUBLEEQUAL int_expr:ie2 {: RESULT = "(" + ie1 + "==" + ie2 + ")"; :} |
+                 int_expr:ie1 NOTEQUAL int_expr:ie2 {: RESULT = "(" + ie1 + "!=" + ie2 + ")"; :} |
+                 TRUE {: RESULT = "true"; :} | FALSE {: RESULT = "false"; :} |
+                 LPAREN set_boolean_expr:sbe RPAREN {: RESULT = "(" + sbe + ")"; :};
+
+set_expr ::= set_expr:sm1 MINUS set_expr:sm2 {: RESULT = "(" + sm1 + "-" + sm2 + ")"; :} |
+             set_expr:se1 INTERSECTION set_expr:se2 {: RESULT = "(" + se1 + "\\cap" + se2 + ")"; :} |
+             set_expr:se1 UNION set_expr:se2 {: RESULT = "(" + se1 + "\\cup" + se2 + ")"; :} |
+             COMPLEMENT LPAREN set_expr:se RPAREN {: RESULT = "\\complement" + "(" + se + ")"; :} |
+             set_proper:sp {: RESULT = sp; :} | 
+             singleton:sing {: RESULT = sing; :} | 
+             empty_set:es {: RESULT = es; :} |
+             LPAREN set_expr:se RPAREN {: RESULT = "(" + se + ")" ; :};
+             
+set_proper ::= SECRET LPAREN AGENT_IDENTIFIER:ai RPAREN {: RESULT = "secret(" + ai + ")" ; :} |
+               FIN LPAREN AGENT_IDENTIFIER:ai RPAREN {: RESULT = "fin(" + ai + ")" ; :} |
+               LPAREN set_proper:sp RPAREN {: RESULT = "(" + sp + ")" ; :};
+
+singleton ::= INIT LPAREN AGENT_IDENTIFIER:ai RPAREN  {: RESULT = "init(" + ai + ")" ; :} |
+              LPAREN singleton:sing RPAREN {: RESULT = "(" + sing + ")" ; :};
+
+empty_set ::= EMPTYSET {: RESULT = "empty" ; :} |
+              LPAREN empty_set:es RPAREN {: RESULT = "(" + es + ")" ; :};
+
+int_expr ::= int_expr:ie1 MINUS int_expr:ie2 {: RESULT = "(" + ie1 + "-" + ie2 + ")"; :}  |
+             int_expr:ie1 PLUS int_expr:ie2  {: RESULT = "(" + ie1 + "+" + ie2 + ")"; :} |
+             int_expr:ie1 MULTIPLY int_expr:ie2 {: RESULT = "(" + ie1 + "*" + ie2 + ")"; :} |
+             int_expr:ie1 MODULUS int_expr:ie2 {: RESULT = "(" + ie1 + "%" + ie2 + ")"; :} |
+             set_magnitude:sm {: RESULT = sm; :} |
+             INTEGER:i {: RESULT = i + ""; :} |
+             LPAREN int_expr:ie RPAREN {: RESULT = "(" + ie + ")"; :};
+
+set_magnitude ::= PIPE set_expr:se PIPE {: RESULT = "|" + se + "|"; :} |
+                  LPAREN set_magnitude:sm RPAREN {: RESULT = "(" + sm + ")"; :};

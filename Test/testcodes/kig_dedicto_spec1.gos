@@ -1,0 +1,5 @@
+begin
+	let a call b if {
+		a knows (secret(a) != secret(b));
+	}
+end

@@ -1,0 +1,13 @@
+
+begin
+	agent a;
+	agent b;
+	agent c;
+
+	let a call b if {
+		disjunct c: {a \neg knows \neg ( 
+			(init(c) \in (secret(a) \cup secret(b))) && (init(c) \notin (secret(a) \cap secret(b)))
+		 )};
+	}
+
+end

@@ -1,0 +1,11 @@
+
+begin
+
+	agent a;
+	agent b;
+
+	let a call b if {
+		a \neg knows \neg (secret(a) != secret(b));
+	}
+
+end

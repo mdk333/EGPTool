@@ -1,0 +1,15 @@
+
+begin
+// This spec uses the disjunction construct; spec1 offers a more succint specification of the protocol
+
+	agent a;
+	agent b;
+	agent c;
+
+	let a call b if {
+		a \neg knows \neg (disjunct c: { 
+			(init(c) \in (secret(a) \cup secret(b))) && (init(c) \notin (secret(a) \cap secret(b)))
+		} );
+	}
+
+end

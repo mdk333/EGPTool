@@ -1,0 +1,207 @@
+import java.util.ArrayList;
+import java.util.HashSet;
+
+action code {: 
+/* When we say  "let a call b" we refer to these two caller respectively */
+/* both caller one and caller two are fixed for each invocation of this parser (they are fixed because they are not varied in the expansion of 
+*  'conjuct' and 'disjunct' expressions */
+/* they are the "i,j" pair from the nested loop that gave rise to this call.*/
+
+/*
+    String callerOne;
+    String callerTwo;
+    
+
+    public void setCallers(String caller1, String caller2){
+        callerOne = caller1;
+        callerTwo = caller2;
+    }
+
+    public String getCallerOne(){
+        return this.callerOne;
+    }
+
+    public String getCallerTwo(){
+        return this.callerTwo;
+    }
+
+*/
+Utilities utilities = new Utilities();
+String neighList = "";
+HashSet<String> topologyAgents = new HashSet<>();
+:};
+
+parser code {: 
+    
+:}
+
+/* Variables */
+terminal String AGENT_IDENTIFIER;
+
+/* Types */
+terminal Integer INTEGER;
+terminal TRUE, FALSE;
+
+/* Key words */
+terminal KNOWS, CALL, LET, IF, DISJUNCT, CONJUNCT, SECRET, INIT, FIN, EMPTYSET;
+
+/* Program punctuations */
+terminal BEGIN, END, SEMI, LPAREN, RPAREN, COLON, COMMA, LBRACE, RBRACE, PIPE;
+
+/* Operators */
+terminal MULTIPLY, PLUS, MINUS, MODULUS;
+terminal DOUBLEEQUAL, LESSTHAN, LESSTHANEQUAL, GREATERTHAN, GREATERTHANEQUAL, NOTEQUAL;
+
+/* Set boolean operators */
+terminal SUBSET, PROPERSUBSET, UNION, INTERSECTION, COMPLEMENT;
+
+/* Boolean operators */
+terminal AND, OR, IMPLIES, NOT, SETELEMENT, NOTSETELEMENT;
+
+terminal TOPOLOGY, NEIGHBOUR;
+terminal EQUIV_NOTION, ASSIGNMENT;
+
+
+/* Non-terminals */
+non terminal String specification, protocol_spec;
+non terminal String call_condition;
+non terminal String condition_expr, set_boolean_expr;
+non terminal String set_expr, int_expr, set_magnitude; 
+non terminal String set_proper, singleton, empty_set;
+non terminal String agent_identifier_list, condition_expr_exp;
+non terminal topology_def, neighbourhood_list;
+non terminal String neighbourhood_state;
+non terminal equivalence_notion;
+
+
+/* Precedences */
+precedence nonassoc LPAREN, RPAREN;
+precedence right NOT;
+precedence left AND, OR;
+precedence left IMPLIES;
+
+precedence left MULTIPLY, MODULUS;
+precedence left PLUS, MINUS;
+
+precedence left DOUBLEEQUAL, LESSTHAN, LESSTHANEQUAL, GREATERTHAN, GREATERTHANEQUAL, NOTEQUAL;
+precedence right COMPLEMENT;
+precedence left SUBSET, PROPERSUBSET, UNION, INTERSECTION;
+
+/* The grammar */
+specification ::= BEGIN {: System.out.println("found BEGIN  from parser ===> !"); :} protocol_spec:ps
+{:
+ // Here write what you will do once you have read in all the codes
+RESULT = ps;
+:} END;
+
+protocol_spec ::= call_condition:cc {: RESULT = cc; :} |
+                  call_condition:cc  topology_def:top {: RESULT = cc; FrameworkEntry.topology = neighList; 
+                                                                      FrameworkEntry.topologyAgents = topologyAgents; :} |
+                  call_condition:cc  topology_def  equivalence_notion {: RESULT = cc; FrameworkEntry.topology = neighList; 
+                                                                      FrameworkEntry.topologyAgents = topologyAgents; :} |
+                  call_condition:cc  equivalence_notion {: RESULT = cc; :} ;
+
+
+call_condition ::= LET AGENT_IDENTIFIER:agentId1 CALL AGENT_IDENTIFIER:agentId2 IF LBRACE condition_expr:conExprString SEMI RBRACE 
+                    {:
+                        // Here call the conditional expression parser to parse the string and return true or false
+                        RESULT = utilities.evaluateCallCondition(agentId1, agentId2, conExprString, this.parser.callerOne, this.parser.callerTwo);
+                    :};
+
+condition_expr ::= DISJUNCT agent_identifier_list:agIdListStr COLON LBRACE condition_expr_exp:conExprStr RBRACE 
+                    {: 
+                        //we'll expand the expression, leaving the place holders for "a" and "b" intact since they are constant
+                        //we'll replace them at the point we are about  to evaluate the expanded condition expression
+
+                        RESULT = utilities.expandDisjunct(agIdListStr, conExprStr); 
+                    :} |
+                   CONJUNCT agent_identifier_list:agIdListStr COLON LBRACE condition_expr_exp:conExprStr RBRACE 
+                    {: 
+                        RESULT = utilities.expandConjunct(agIdListStr, conExprStr); 
+                    :} |
+                   AGENT_IDENTIFIER:agentId KNOWS condition_expr:conExprStr {: RESULT = "[" + agentId + "]" + " knows(" + conExprStr + ")"; :} /* de dicto */ |
+                   AGENT_IDENTIFIER:agentId NOT KNOWS condition_expr:conExprStr {: RESULT = "[" + agentId + "]" + " \\neg knows(" + conExprStr + ")"; :}/* de dicto */ |
+            /* add the following to allow a combination of different protocols */
+                   condition_expr:conExprStr1 OR condition_expr:conExprStr2 {: RESULT = "(" + conExprStr1 + "||" + conExprStr2 + ")"; :} |
+                   condition_expr:conExprStr1 AND condition_expr:conExprStr2 {: RESULT = "(" + conExprStr1 + "&&" + conExprStr2 + ")"; :} |
+                   condition_expr:conExprStr1 IMPLIES condition_expr:conExprStr2 {: RESULT = "(" + conExprStr1 + "->" + conExprStr2 + ")"; :} |
+                   NOT condition_expr:conExprStr {: RESULT = "\\neg(" + conExprStr + ")" ; :} |
+                   set_boolean_expr:seAlgStr {: RESULT = "(" + seAlgStr + ")" ; :} |
+                   LPAREN condition_expr:conExprStr RPAREN {: RESULT = "(" + conExprStr + ")" ; :};
+                   
+agent_identifier_list ::= agent_identifier_list:agIdList COMMA AGENT_IDENTIFIER:agentId {: RESULT = agIdList + "," + "[" + agentId + "]"; :} |
+                          AGENT_IDENTIFIER:agentId {: RESULT = "[" + agentId + "]"; :};
+
+condition_expr_exp ::= AGENT_IDENTIFIER:agentId KNOWS condition_expr_exp:cExprString {: RESULT = "[" + agentId + "]" + " knows (" + cExprString + ")" ; :} |   
+                   AGENT_IDENTIFIER:agentId NOT KNOWS condition_expr_exp:cExprString {: RESULT = "[" + agentId + "]" + " \\neg knows (" + cExprString + ")" ; :} |
+                   NOT condition_expr_exp:cExprString {: RESULT = "\\neg (" + cExprString + ")" ; :} |
+                   set_boolean_expr:setAlgString {: RESULT = "(" + setAlgString + ")" ; :} |
+                   LPAREN condition_expr_exp:cExprString  {: RESULT = "(" + cExprString + ")" ; :} RPAREN ;
+
+
+set_boolean_expr ::= set_boolean_expr:beExprStr1 AND set_boolean_expr:beExprStr2 {: RESULT = "(" + beExprStr1 + "&&" + beExprStr2 + ")"; :} |
+                 set_boolean_expr:beExprStr1 OR set_boolean_expr:beExprStr2 {: RESULT = "(" + beExprStr1 + "||" + beExprStr2 + ")"; :} |
+                 set_boolean_expr:beExprStr1 IMPLIES set_boolean_expr:beExprStr2 {: RESULT = "(" + beExprStr1 + "->" + beExprStr2 + ")"; :} |
+                 singleton:sinStr SETELEMENT set_expr:seStr {: RESULT = "(" + sinStr + "\\in" + seStr + ")"; :} |
+                 singleton:sinStr NOTSETELEMENT set_expr:seStr {: RESULT = "(" + sinStr + "\\notin" + seStr + ")"; :} |
+                 set_expr:seStr1 SUBSET set_expr:seStr2 {: RESULT = "(" + seStr1 + "\\subset" + seStr2 + ")"; :} |
+                 set_expr:seStr1 PROPERSUBSET set_expr:seStr2 {: RESULT = "(" + seStr1 + "\\subseteq" + seStr2 + ")"; :} |
+                 set_expr:seStr1 DOUBLEEQUAL set_expr:seStr2 {: RESULT = "(" + seStr1 + "==" + seStr2 + ")"; :} |
+                 set_expr:seStr1 NOTEQUAL set_expr:seStr2 {: RESULT = "(" + seStr1 + "!=" + seStr2 + ")"; :} |
+                 int_expr:intStr1 GREATERTHAN int_expr:intStr2 {: RESULT = "(" + intStr1 + ">" + intStr2 + ")"; :} |
+                 int_expr:intStr1 GREATERTHANEQUAL int_expr:intStr2 {: RESULT = "(" + intStr1 + ">=" + intStr2 + ")"; :} |
+                 int_expr:intStr1 LESSTHAN int_expr:intStr2 {: RESULT = "(" + intStr1 + "<" + intStr2 + ")"; :} |
+                 int_expr:intStr1 LESSTHANEQUAL int_expr:intStr2 {: RESULT = "(" + intStr1 + "<=" + intStr2 + ")"; :} |
+                 int_expr:intStr1 DOUBLEEQUAL int_expr:intStr2 {: RESULT = "(" + intStr1 + "==" + intStr2 + ")"; :} |
+                 int_expr:intStr1 NOTEQUAL int_expr:intStr2 {: RESULT = "(" + intStr1 + "!=" + intStr2 + ")"; :} |
+                 TRUE {: RESULT = "true"; :} | FALSE {: RESULT = "false"; :} |
+                 LPAREN set_boolean_expr:beStr RPAREN {: RESULT = "(" + beStr + ")"; :};
+
+ /* Note that you cannot define the RHS of a non-terminal before you use it. For example, you cannot 
+*  define the RHS of set_expr (given below) before defining the RHS of boolean_expr (given above),
+*  otherwise the grammar for that fragment (set_expr, in this case) that was misplaced will not
+* be matched, leading to syntax error. This happened to me with set_expr (and all it comprises) 
+* vis-a-vis boolean_expr 
+*/   
+             
+set_expr ::= set_expr:seStr1 MINUS set_expr:seStr2 {: RESULT = "(" + seStr1 + "-" + seStr2 + ")"; :} |
+             set_expr:seStr1 INTERSECTION set_expr:seStr2 {: RESULT = "(" + seStr1 + "\\cap" + seStr2 + ")"; :} |
+             set_expr:seStr1 UNION set_expr:seStr2 {: RESULT = "(" + seStr1 + "\\cup" + seStr2 + ")"; :} |
+             set_expr:seStr1 COMPLEMENT set_expr:seStr2 {: RESULT = "(" + seStr1 + "\\complement" + seStr2 + ")"; :} |
+             set_proper:setpropStr {: RESULT = setpropStr; :} | 
+             singleton:sinStr {: RESULT = sinStr; :} | 
+             empty_set:empStr {: RESULT = empStr; :} |
+             LPAREN set_expr:seExprStr RPAREN {: RESULT = "(" + seExprStr + ")" ; :};
+             
+set_proper ::= SECRET LPAREN AGENT_IDENTIFIER:agentId RPAREN {: RESULT = "secret(" + "[" + agentId + "]" + ")" ; :} |
+               FIN LPAREN AGENT_IDENTIFIER:agentId RPAREN {: RESULT = "fin(" + "[" + agentId + "]" + ")" ; :} |
+               LPAREN set_proper:sp RPAREN {: RESULT = "(" + sp + ")"; :};
+
+singleton ::= INIT LPAREN AGENT_IDENTIFIER:agentId RPAREN {: RESULT = "init(" +  "[" + agentId + "]" + ")" ; :} |
+              LPAREN singleton:sing RPAREN {: RESULT = "(" + sing + ")"; :};
+
+empty_set ::= EMPTYSET {: RESULT = "empty" ; :} |
+              LPAREN empty_set:es RPAREN {: RESULT = "(" + es + ")"; :};
+
+int_expr ::= int_expr:intStr1 MINUS int_expr:intStr2 {: RESULT = "(" + intStr1 + "-" + intStr2 + ")"; :} |
+             int_expr:intStr1 PLUS int_expr:intStr2  {: RESULT = "(" + intStr1 + "+" + intStr2 + ")"; :} |
+             int_expr:intStr1 MULTIPLY int_expr:intStr2 {: RESULT = "(" + intStr1 + "*" + intStr2 + ")"; :} |
+             int_expr:intStr1 MODULUS int_expr:intStr2 {: RESULT = "(" + intStr1 + "%" + intStr2 + ")"; :} |
+             set_magnitude:setMagStr {: RESULT = setMagStr; :} |
+             INTEGER:integ {: RESULT = integ + ""; :} |
+             LPAREN int_expr:intStr RPAREN {: RESULT = "(" + intStr + ")"; :};
+
+set_magnitude ::= PIPE set_expr:seStr PIPE {: RESULT = "|" + seStr + "|"; :} |
+                  LPAREN set_magnitude:sm RPAREN {: RESULT = "(" + sm + ")"; :};
+
+topology_def ::=  TOPOLOGY LBRACE neighbourhood_list RBRACE ;
+
+neighbourhood_list  ::= neighbourhood_state | neighbourhood_state neighbourhood_list;
+
+neighbourhood_state ::= AGENT_IDENTIFIER:ai NEIGHBOUR AGENT_IDENTIFIER:aii SEMI {: neighList = neighList.concat("(" + ai + "," + aii + ")" + ":"); 
+                                                                                   neighList = neighList.concat("(" + aii + "," + ai + ")" + ":");
+                                                                                   topologyAgents.add(ai);
+                                                                                   topologyAgents.add(aii);
+                                                                                :}; // we assume that if a is a neighour of b, that b is also a neighbour of a
+
+equivalence_notion ::= EQUIV_NOTION ASSIGNMENT INTEGER:eq SEMI {: FrameworkEntry.equivalenceNotion = eq; :};

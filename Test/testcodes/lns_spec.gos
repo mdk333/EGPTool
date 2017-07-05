@@ -1,0 +1,9 @@
+
+begin
+
+
+	let a call b if {
+		a knows (init(b) \notin secret(a));
+	}
+
+end

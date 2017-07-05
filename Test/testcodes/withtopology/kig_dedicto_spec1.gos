@@ -1,0 +1,17 @@
+
+begin
+
+	let a call b if {
+		a knows (secret(a) != secret(b));
+	}
+	
+	topology {
+		a neighbour b;
+		b neighbour c;
+		c neighbour d;
+		d neighbour a;
+	}
+	
+
+end
+
