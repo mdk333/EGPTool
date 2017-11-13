@@ -1,3 +1,11 @@
+/**
+ *
+ * @author Maduka Attamah
+ *
+ * Copyright 2011-2015 Maduka Attamah
+ *
+ */
+
 /* This parser specification for the parser to parse the boolean expression part of the expanded specification */
 
 action code {: 
