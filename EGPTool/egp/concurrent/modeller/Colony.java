@@ -1,15 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+
+/**
+ *
+ * @author Maduka Attamah
+ *
+ * Copyright 2011-2015 Maduka Attamah
+ *
  */
+
 package egp.concurrent.modeller;
 
 import java.util.ArrayList;
 
-/**
- *
- * @author byear
- */
 public class Colony {
     private final ArrayList<SituationBHive> colonyMembers;
     private final ArrayList<Colony> childColonies;
