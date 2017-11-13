@@ -1,4 +1,12 @@
-/* This parser specification for the parser to parse the expanded condition_expr, that is
+/**
+ *
+ * @author Maduka Attamah
+ *
+ * Copyright 2011-2015 Maduka Attamah
+ *
+ */
+
+/* This parser specification is for the parser to parse the expanded condition_expr, that is
    the condition expression without disjunction and conjuction constructs, as well as 
     without all the preambles. */
 
