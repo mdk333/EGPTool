@@ -1,9 +1,13 @@
+/**
+ *
+ * @author Maduka Attamah
+ *
+ * Copyright 2011-2015 Maduka Attamah
+ *
+ */
+
 package egp.concurrent.modeller;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 import egp.FrameworkEntry;
 import egp.concurrent.parsers.ExpCCParser;
 import egp.concurrent.util.Utilities;
@@ -16,10 +20,6 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author byear
- */
 public class TaskComputeNodeSuccessors implements Callable {
 
     private final SituationBHive situation;
