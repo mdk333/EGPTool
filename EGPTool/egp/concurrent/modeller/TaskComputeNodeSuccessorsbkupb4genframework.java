@@ -1,19 +1,19 @@
+/**
+ *
+ * @author Maduka Attamah
+ *
+ * Copyright 2011-2015 Maduka Attamah
+ *
+ */
+
 package egp.concurrent.modeller;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 import egp.FrameworkEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 
-/**
- *
- * @author byear
- */
 public class TaskComputeNodeSuccessorsbkupb4genframework implements Callable {
 
     private final SituationBHive situation;
