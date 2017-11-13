@@ -10,6 +10,7 @@ begin
 		a knows (secret(a) != secret(b));
 	}
 	
+	// Circle topology - four agents
 	topology {
 		a neighbour b;
 		b neighbour c;
