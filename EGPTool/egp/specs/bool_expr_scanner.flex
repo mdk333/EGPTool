@@ -1,3 +1,13 @@
+
+/**
+ *
+ * @author Maduka Attamah
+ *
+ * Copyright 2011-2015 Maduka Attamah
+ *
+ */
+ 
+ 
 package kig.multithread;
 import java_cup.runtime.*;
 
