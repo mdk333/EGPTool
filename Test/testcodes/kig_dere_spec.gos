@@ -1,4 +1,9 @@
-
+ //
+ // @author Maduka Attamah
+ //
+ // Copyright 2011-2015 Maduka Attamah
+ //
+ 
 begin
 
 	let a call b if {
