@@ -1,15 +1,15 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ *
+ * @author Maduka Attamah
+ *
+ * Copyright 2011-2015 Maduka Attamah
+ *
  */
+
 package egp.concurrent.modeller;
 
 import java.util.HashMap;
 
-/**
- *
- * @author byear
- */
 public class SituationBHive extends Situation{
 
     private HashMap<Integer, Colony> colony;
