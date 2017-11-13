@@ -1,15 +1,15 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+
+/**
+ *
+ * @author Maduka Attamah
+ *
+ * Copyright 2011-2015 Maduka Attamah
  */
+
 package egp.concurrent.modeller;
 
 import java.io.Serializable;
 
-/**
- *
- * @author byear
- */
 public class Situation implements Serializable {
     private static final long serialVersionUID = 2L;
     private String history;
