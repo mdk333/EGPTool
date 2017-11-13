@@ -1,6 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ *
+ * @author Maduka Attamah
+ *
+ * Copyright 2011-2015 Maduka Attamah
+ *
  */
 package egp.concurrent.util;
 
@@ -15,10 +18,7 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author byear
- */
+
 public class Utilities {
 
     public HashSet<SituationBHive> TT;// = new HashSet<>();
