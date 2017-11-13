@@ -1,9 +1,14 @@
+/**
+ *
+ * @author Maduka Attamah
+ *
+ * Copyright 2011-2015 Maduka Attamah
+ *
+ */
+
 package egp;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 import egp.concurrent.modeller.Colony;
 import egp.concurrent.modeller.SituationBHive;
 import egp.concurrent.modeller.TaskComputeNodeSuccessors;
@@ -30,10 +35,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author byear
- */
+
 public class FrameworkEntry {
 
     public static int numberOfAgents;
